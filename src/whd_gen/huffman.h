@@ -10,6 +10,7 @@
 #include <queue>
 #include <memory>
 #include <iostream>
+#include <limits>
 
 template<typename S, typename C = std::less<S>, int N = 15> struct huffman_params {
     using symbol_type = S;
