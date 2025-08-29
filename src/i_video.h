@@ -23,10 +23,24 @@
 
 #include "doomtype.h"
 
+#ifdef ST7789
+#undef SCREENWIDTH
+#undef SCREENHEIGHT
+#define SCREENWIDTH 320
+#define SCREENHEIGHT 200
+#define DISPLAY_WIDTH 240
+#define DISPLAY_HEIGHT 240
+#define DISPLAY_TOP_OFFSET 20
+#endif
+
 // Screen width and height.
 
+#ifndef SCREENWIDTH
 #define SCREENWIDTH  320
+#endif
+#ifndef SCREENHEIGHT
 #define SCREENHEIGHT 200
+#endif
 #if DOOM_TINY
 #define MAIN_VIEWHEIGHT (SCREENHEIGHT - 32 /* ST_HEIGHT */)
 #endif

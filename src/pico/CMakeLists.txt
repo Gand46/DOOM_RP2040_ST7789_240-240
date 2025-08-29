@@ -32,12 +32,11 @@ target_include_directories(common_pico INTERFACE
 
 target_compile_definitions(common_pico INTERFACE
         NO_USE_MOUSE=1
-        PICO_AUDIO_I2S_PIO=1
-        PICO_AUDIO_I2S_DMA_IRQ=1
+        ST7789=1
+        USE_AUDIO_PWM=1
         )
 
-pico_generate_pio_header(common_pico ${CMAKE_CURRENT_LIST_DIR}/video_doom.pio)
-target_link_libraries(common_pico INTERFACE pico_stdlib pico_multicore pico_scanvideo_dpi)
+target_link_libraries(common_pico INTERFACE pico_stdlib pico_multicore hardware_spi pico_audio_pwm)
 
 add_library(pico_cd INTERFACE)
 if (TARGET tinyusb_host)

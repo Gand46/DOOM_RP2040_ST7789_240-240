@@ -32,7 +32,8 @@
 
 #include "doomtype.h"
 #include "i_picosound.h"
-#include "pico/audio_i2s.h"
+#include "magc.h"
+#include "pico/audio_pwm.h"
 #include "pico/binary_info.h"
 #include "hardware/gpio.h"
 
@@ -423,29 +424,14 @@ static boolean I_Pico_InitSound(boolean _use_sfx_prefix)
     // todo this will likely need adjustment - maybe with IRQs/double buffer & pull from audio we can make it quite small
     producer_pool = audio_new_producer_pool(&producer_format, 2, 1024); // todo correct size
 
-    struct audio_i2s_config config = {
-            .data_pin = PICO_AUDIO_I2S_DATA_PIN,
-            .clock_pin_base = PICO_AUDIO_I2S_CLOCK_PIN_BASE,
-            .dma_channel = 6,
-            .pio_sm = 0,
-    };
-
     const struct audio_format *output_format;
-    output_format = audio_i2s_setup(&audio_format, &config);
+    output_format = audio_pwm_setup(&audio_format, -1, &default_left_channel_config, &default_right_channel_config);
     if (!output_format) {
         panic("PicoAudio: Unable to open audio device.\n");
     }
-
-#if INCREASE_I2S_DRIVE_STRENGTH
-    bi_decl(bi_program_feature("12mA I2S"));
-    gpio_set_drive_strength(PICO_AUDIO_I2S_DATA_PIN, GPIO_DRIVE_STRENGTH_12MA);
-    gpio_set_drive_strength(PICO_AUDIO_I2S_CLOCK_PIN_BASE, GPIO_DRIVE_STRENGTH_12MA);
-    gpio_set_drive_strength(PICO_AUDIO_I2S_CLOCK_PIN_BASE+1, GPIO_DRIVE_STRENGTH_12MA);
-#endif
-    // we want to pass thr
-    bool ok = audio_i2s_connect_extra(producer_pool, false, 0, 0, NULL);
+    bool ok = audio_pwm_default_connect(producer_pool, false);
     assert(ok);
-    audio_i2s_set_enabled(true);
+    audio_pwm_set_enabled(true);
 
     sound_initialized = true;
     return true;
