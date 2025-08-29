@@ -14,6 +14,7 @@
 #include <cstdarg>
 #include <array>
 #include <cmath>
+#include <limits>
 #include "doomdata.h"
 #include "whddata.h"
 #include "compress_mus.h"

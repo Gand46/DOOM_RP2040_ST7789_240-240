@@ -6,6 +6,8 @@
 #pragma once
 #include <string>
 #include <algorithm>
+#include <limits>
+#include <cstdio>
 
 struct statsomizer {
     const std::string name;

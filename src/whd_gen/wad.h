@@ -13,6 +13,7 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
+#include <cstdint>
 inline std::string to_lower(std::string x) {
     std::for_each(x.begin(), x.end(), [](char & c){
         c = ::tolower(c);
@@ -48,13 +49,15 @@ struct wad {
     }
 
     void keep_only(const std::set<int>& nums) {
-        for(auto it = lumps.begin(); it != lumps.end();) {
+        for (auto it = lumps.begin(); it != lumps.end();) {
             if (it->second.data.empty() || nums.find(it->first) != nums.end()) {
-//                printf("Keeping %s\n", it->second.name.c_str());
-                it++;
+                // Keep lump
+                ++it;
             } else {
+                // Remove lump and corresponding name without using invalid iterator
+                std::string name = it->second.name;
                 it = lumps.erase(it);
-                lump_names.erase(it->second.name);
+                lump_names.erase(name);
             }
         }
     }
@@ -93,7 +96,7 @@ struct wad {
     void update_lump(const lump& lump) {
         assert(lump.num>=0);
         if (to_lower(lumps[lump.num].name) != to_lower(lump.name)) {
-            auto it = lump_names.find(to_lower(name));
+            auto it = lump_names.find(to_lower(lump.name));
             if (it != lump_names.end()) {
                 lump_names.erase(it);
             }
