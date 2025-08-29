@@ -40,6 +40,8 @@
 bi_decl(bi_program_feature("USB keyboard support"));
 #endif
 
+#include "hardware/gpio.h"
+#include "magc.h"
 static const int scancode_translate_table[] = SCANCODE_TO_KEYS_ARRAY;
 
 // Lookup table for mapping ASCII characters to their equivalent when
@@ -511,6 +513,30 @@ static void pico_quit(void) {
 }
 #endif
 
+static void magc_key_init(void) {
+    gpio_init(PIN_RT); gpio_pull_up(PIN_RT); gpio_set_dir(PIN_RT, GPIO_IN);
+    gpio_init(PIN_LT); gpio_pull_up(PIN_LT); gpio_set_dir(PIN_LT, GPIO_IN);
+    gpio_init(PIN_UP); gpio_pull_up(PIN_UP); gpio_set_dir(PIN_UP, GPIO_IN);
+    gpio_init(PIN_DN); gpio_pull_up(PIN_DN); gpio_set_dir(PIN_DN, GPIO_IN);
+    gpio_init(PIN_SL); gpio_pull_up(PIN_SL); gpio_set_dir(PIN_SL, GPIO_IN);
+    gpio_init(PIN_ST); gpio_pull_up(PIN_ST); gpio_set_dir(PIN_ST, GPIO_IN);
+    gpio_init(PIN_A); gpio_pull_up(PIN_A); gpio_set_dir(PIN_A, GPIO_IN);
+    gpio_init(PIN_B); gpio_pull_up(PIN_B); gpio_set_dir(PIN_B, GPIO_IN);
+}
+
+static void magc_key_scan(void) {
+    static int prev_A=1, prev_B=1, prev_ST=1, prev_SL=1, prev_UP=1, prev_DN=1, prev_LT=1, prev_RT=1;
+    int v;
+    v = gpio_get(PIN_A); if(v!=prev_A){ prev_A=v; if(!v){pico_key_down(SDL_SCANCODE_SPACE,0,0); pico_key_down(SDL_SCANCODE_LSHIFT,0,0);} else {pico_key_up(SDL_SCANCODE_SPACE,0,0); pico_key_up(SDL_SCANCODE_LSHIFT,0,0);} }
+    v = gpio_get(PIN_B); if(v!=prev_B){ prev_B=v; if(!v){pico_key_down(SDL_SCANCODE_RCTRL,0,0);} else {pico_key_up(SDL_SCANCODE_RCTRL,0,0);} }
+    v = gpio_get(PIN_ST); if(v!=prev_ST){ prev_ST=v; if(!v){pico_key_down(SDL_SCANCODE_RETURN,0,0);} else {pico_key_up(SDL_SCANCODE_RETURN,0,0);} }
+    v = gpio_get(PIN_SL); if(v!=prev_SL){ prev_SL=v; if(!v){pico_key_down(SDL_SCANCODE_ESCAPE,0,0);} else {pico_key_up(SDL_SCANCODE_ESCAPE,0,0);} }
+    v = gpio_get(PIN_UP); if(v!=prev_UP){ prev_UP=v; if(!v){pico_key_down(SDL_SCANCODE_UP,0,0);} else {pico_key_up(SDL_SCANCODE_UP,0,0);} }
+    v = gpio_get(PIN_DN); if(v!=prev_DN){ prev_DN=v; if(!v){pico_key_down(SDL_SCANCODE_DOWN,0,0);} else {pico_key_up(SDL_SCANCODE_DOWN,0,0);} }
+    v = gpio_get(PIN_LT); if(v!=prev_LT){ prev_LT=v; if(!v){pico_key_down(SDL_SCANCODE_LEFT,0,0);} else {pico_key_up(SDL_SCANCODE_LEFT,0,0);} }
+    v = gpio_get(PIN_RT); if(v!=prev_RT){ prev_RT=v; if(!v){pico_key_down(SDL_SCANCODE_RIGHT,0,0);} else {pico_key_up(SDL_SCANCODE_RIGHT,0,0);} }
+}
+
 void I_InputInit(void) {
 #if PICO_NO_HARDWARE
     platform_key_down = pico_key_down;
@@ -520,12 +546,14 @@ void I_InputInit(void) {
     tusb_init();
     irq_set_priority(USBCTRL_IRQ, 0xc0);
 #endif
+    magc_key_init();
 }
 
 void I_GetEvent() {
 #if USB_SUPPORT
     tuh_task();
 #endif
+    magc_key_scan();
     return I_GetEventTimeout(50);
 }
 
